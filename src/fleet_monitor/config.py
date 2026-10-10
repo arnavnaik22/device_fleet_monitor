@@ -13,7 +13,7 @@ def _get_int(name: str, default: int) -> int:
 
 
 HEARTBEAT_TIMEOUT_SECONDS = _get_int("HEARTBEAT_TIMEOUT_SECONDS", 30)
-HOST = os.getenv("HOST", "0.0.0.0")
+HOST = os.getenv("HOST", "127.0.0.1")
 PORT = _get_int("PORT", 8000)
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 

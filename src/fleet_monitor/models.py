@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 from typing import Annotated, Literal
 
@@ -71,8 +72,19 @@ class HeartbeatRequest(BaseModel):
 	def validate_cpu_usage(cls, value: float | None) -> float | None:
 		if value is None:
 			return None
+		if not math.isfinite(value):
+			raise ValueError("cpu_usage must be a finite number between 0 and 100")
 		if not 0 <= value <= 100:
 			raise ValueError("cpu_usage must be between 0 and 100")
+		return value
+
+	@field_validator("signal_strength")
+	@classmethod
+	def validate_signal_strength(cls, value: int | None) -> int | None:
+		if value is None:
+			return None
+		if not -120 <= value <= 0:
+			raise ValueError("signal_strength must be between -120 and 0")
 		return value
 
 
