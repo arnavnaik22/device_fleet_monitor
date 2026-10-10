@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from threading import Lock
+from datetime import datetime
 
 from .domain import Device
 from .errors import DeviceAlreadyExists, DeviceNotFound
@@ -34,11 +35,12 @@ class DeviceStore:
 		self,
 		device_id: str,
 		*,
-		last_seen_at,
-		last_heartbeat,
+		last_seen_at: datetime,
+		last_heartbeat: datetime,
 		reported_status: str,
-		cpu_usage,
-		signal_strength,
+		cpu_usage: float | None,
+		signal_strength: int | None,
+		overwrite_latest: bool,
 	) -> Device:
 		with self._lock:
 			device = self._devices.get(device_id)
@@ -46,10 +48,11 @@ class DeviceStore:
 				raise DeviceNotFound(device_id)
 
 			device.last_seen_at = last_seen_at
-			device.last_heartbeat = last_heartbeat
-			device.reported_status = reported_status
-			device.cpu_usage = cpu_usage
-			device.signal_strength = signal_strength
+			if overwrite_latest:
+				device.last_heartbeat = last_heartbeat
+				device.reported_status = reported_status
+				device.cpu_usage = cpu_usage
+				device.signal_strength = signal_strength
 			return replace(device)
 
 	def snapshot(self) -> list[Device]:
