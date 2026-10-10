@@ -31,24 +31,25 @@ class DeviceService:
 		self,
 		device_id: str,
 		*,
-		timestamp: datetime,
+		timestamp: datetime | None,
 		status: str,
 		cpu_usage: float | None,
 		signal_strength: int | None,
 	) -> Device:
 		device = self.store.get(device_id)
 		seen_at = self.clock.now()
+		heartbeat_timestamp = timestamp or seen_at
 		overwrite_latest = (
-			device.last_heartbeat is None or timestamp >= device.last_heartbeat
+			device.last_heartbeat is None or heartbeat_timestamp >= device.last_heartbeat
 		)
-		heartbeat_timestamp = timestamp if overwrite_latest else device.last_heartbeat
+		latest_timestamp = heartbeat_timestamp if overwrite_latest else device.last_heartbeat
 		heartbeat_status = status if overwrite_latest else device.reported_status or status
 		heartbeat_cpu = cpu_usage if overwrite_latest else device.cpu_usage
 		heartbeat_signal = signal_strength if overwrite_latest else device.signal_strength
 		return self.store.update_heartbeat(
 			device_id,
 			last_seen_at=seen_at,
-			last_heartbeat=heartbeat_timestamp,
+			last_heartbeat=latest_timestamp,
 			reported_status=heartbeat_status,
 			cpu_usage=heartbeat_cpu,
 			signal_strength=heartbeat_signal,
