@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Literal
 
 from fastapi import FastAPI, Path, Query, status
-from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from .clock import Clock, SystemClock
@@ -49,13 +48,6 @@ def create_app(clock: Clock | None = None, timeout: int | None = None) -> FastAP
 		return JSONResponse(
 			status_code=status.HTTP_404_NOT_FOUND,
 			content={"detail": f"Device '{exc.args[0]}' not found"},
-		)
-
-	@app.exception_handler(RequestValidationError)
-	async def request_validation_handler(_, exc: RequestValidationError):
-		return JSONResponse(
-			status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-			content={"detail": exc.errors()},
 		)
 
 	@app.get("/health")
